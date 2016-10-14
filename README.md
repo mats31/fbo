@@ -1,4 +1,4 @@
-threejs-starter-kit
+FBO Tests
 ===================
 
 It uses Three.js and Greensock as depencies.
