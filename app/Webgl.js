@@ -55,7 +55,7 @@ export default class Webgl {
           'obj/test.obj',
           ( obj ) => {
             data = this.parseMesh( obj );
-            this.createFBO( data, width, height );
+            this.createFBO( data.data, data.size, data.size );
           }
       );
     }
@@ -173,22 +173,19 @@ export default class Webgl {
     });
 
     const total = vertices.length;
-    const size = parseInt( Math.sqrt( total * 3 ), 10 );
+    const size = parseInt( Math.sqrt( total ), 10 );
     const data = new Float32Array( size * size * 3 );
 
     for ( let i = 0; i < total; i += 3 ) {
       data[i] = vertices[i];
       data[i + 1] = vertices[i + 1];
       data[i + 2] = vertices[i + 2];
-
-    //   if (vertices[i] === 0) console.log(0);
-    //   if (vertices[i+1] === 0) console.log(1);
-    //   if (vertices[i+2] === 0) console.log(2);
     }
 
-    // console.log(data);
-
-    return data;
+    return {
+      data,
+      size
+    };
   }
 
   resize( width, height ) {
