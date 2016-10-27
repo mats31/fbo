@@ -23,8 +23,10 @@ export default class Webgl {
 
     this.fbo = false;
 
+    this.type = 'obj'
+
     // this.provideData( 'random' );
-    this.provideData( 'image' );
+    this.provideData( this.type );
     // this.provideData( 'obj' );
   }
 
@@ -53,6 +55,7 @@ export default class Webgl {
           'obj/test.obj',
           ( obj ) => {
             data = this.parseMesh( obj );
+            this.createFBO( data, width, height );
           }
       );
     }
@@ -86,6 +89,8 @@ export default class Webgl {
     // init the FBO
     this.fbo = new FBO( width, height, this.renderer, simulationShader, renderShader );
     this.scene.add( this.fbo.particles );
+
+    if (this.type = 'obj') this.fbo.particles.position.z += 30;
   }
 
   getRandomData( width, height, size ) {
@@ -122,8 +127,68 @@ export default class Webgl {
     return data;
   }
 
-  parseMesh( g ) {
-    console.log( g );
+  parseMesh( obj ) {
+
+    const vertices = [];
+
+    obj.traverse( ( child ) => {
+
+      if ( child instanceof THREE.Mesh ) {
+        const meshVertices = child.geometry.attributes.position.array;
+
+        for ( let i = 0; i < meshVertices.length; i++ ) {
+          vertices.push( meshVertices[i]);
+        }
+      } else {
+        child.traverse( ( nextChild ) => {
+          if ( child instanceof THREE.Mesh ) {
+            const meshVertices = nextChild.geometry.attributes.position.array;
+
+            for ( let i = 0; i < meshVertices.length; i++ ) {
+              vertices.push( meshVertices[i]);
+            }
+          } else {
+            nextChild.traverse( ( newChild ) => {
+              if ( newChild instanceof THREE.Mesh ) {
+                const meshVertices = newChild.geometry.attributes.position.array;
+
+                for ( let i = 0; i < meshVertices.length; i++ ) {
+                  vertices.push( meshVertices[i]);
+                }
+              } else {
+                newChild.traverse( ( lastChild ) => {
+                  if ( lastChild instanceof THREE.Mesh ) {
+                    const meshVertices = lastChild.geometry.attributes.position.array;
+
+                    for ( let i = 0; i < meshVertices.length; i++ ) {
+                      vertices.push( meshVertices[i]);
+                    }
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+
+    const total = vertices.length;
+    const size = parseInt( Math.sqrt( total * 3 ), 10 );
+    const data = new Float32Array( size * size * 3 );
+
+    for ( let i = 0; i < total; i += 3 ) {
+      data[i] = vertices[i];
+      data[i + 1] = vertices[i + 1];
+      data[i + 2] = vertices[i + 2];
+
+    //   if (vertices[i] === 0) console.log(0);
+    //   if (vertices[i+1] === 0) console.log(1);
+    //   if (vertices[i+2] === 0) console.log(2);
+    }
+
+    // console.log(data);
+
+    return data;
   }
 
   resize( width, height ) {
