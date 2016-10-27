@@ -23,7 +23,7 @@ export default class Webgl {
 
     this.fbo = false;
 
-    this.type = 'obj'
+    this.type = 'image'
 
     // this.provideData( 'random' );
     this.provideData( this.type );
